@@ -1,4 +1,6 @@
-export default function Student ({firstname, lastname, grade, deleteStudent, studentID}){
+import { updateDoc } from "firebase/firestore"
+
+export default function Student ({firstname, lastname, grade, deleteStudent, studentID, updateStudent}){
 
     return (
         <section>
@@ -7,7 +9,10 @@ export default function Student ({firstname, lastname, grade, deleteStudent, stu
             <button onClick={()=>{
                 deleteStudent(studentID, firstname, lastname)
             }} className="btn btn-danger btn-sm float-end">Delete</button>
-            <button className="btn btn-success btn-sm float-end me-2">Edit</button>
+            <button onClick={()=>{
+                updateStudent(studentID, firstname, lastname, grade)
+            }}
+            className="btn btn-success btn-sm float-end me-2">Edit</button>
             </div>
         </section>
     )

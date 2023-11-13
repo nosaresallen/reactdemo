@@ -1,6 +1,6 @@
 import Student from "./Student";
 import { useState, useEffect } from "react";
-import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from "firebase/firestore";
 import firebaseApp from "./firebase.Config";
 
 function Home (){
@@ -12,6 +12,8 @@ function Home (){
     });
     const [studentList, setStudentList] = useState([]);
     // const [savedStudentList, setSavedStudentList] = useState([]);
+
+    const [editToggle, setEditToggle] = useState(false);
 
     useEffect(()=>{
         
@@ -72,12 +74,43 @@ function Home (){
 
     }
 
+    // Deleting a specific data from firestore
     const deleteStudent = (studentID, firstname, lastname) => {
         const db = getFirestore(firebaseApp);
         confirm(`Are you sure you want to delete ${firstname} ${lastname}?`).then(
             deleteDoc(doc(db, 'students', studentID))
         )
         
+    }
+
+    // Updating a specific data from firestore
+    const updateStudent = (studentID, firstname, lastname, grade) => {
+        setEditToggle(true);
+        setStudent({
+            studentID: studentID,
+            firstname: firstname,
+            lastname: lastname,
+            grade: grade
+
+        });
+    }
+
+    const handleStudentUpdate = () => {
+        const db = getFirestore(firebaseApp);
+
+        const studentRef = doc(db, 'students', student.studentID);
+
+        updateDoc(studentRef, {
+            firstname: student.firstname,
+            lastname: student.lastname,
+            grade: student.grade
+        });
+        setEditToggle(false);
+        setStudent({
+            firstname: '',
+            lastname: '',
+            grade: '',
+        });
     }
 
     return(
@@ -117,11 +150,30 @@ function Home (){
                             value={student.grade}
                             type="number" name="number" id="number" min={0} max={100}/>
                     </div>
-                    <div className="col-md-2">
-                        <button onClick={()=>{addStudent()}} className="btn btn-dark mt-3">Add +</button>
-                    </div>
+
+                    {
+                        editToggle
+                        
+                        ?
+
+                        (
+                            <div className="col-md-2">
+                            <button onClick={()=>{handleStudentUpdate()}} className="btn btn-success mt-3">Update</button>
+                            </div>
+                        )
+
+                        :
+
+                        (
+                            <div className="col-md-2">
+                            <button onClick={()=>{addStudent()}} className="btn btn-dark mt-3">Add +</button>
+                            </div>
+                        )
+                    }
+                    
                     <div className="alert alert-light mt-3">
-                    <h3 className="mt-3 fw-bold">{student.firstname} {student.lastname} <span className="badge bg-dark text-white">{student.grade}</span></h3>
+                        <h3 className="mt-3 fw-bold">{student.firstname} {student.lastname} <span className="badge bg-dark text-white">{student.grade}</span></h3>
+                    
                     </div>
                 </div>
                 
@@ -135,6 +187,7 @@ function Home (){
                         lastname={studentRecord.lastname}
                         grade={studentRecord.grade}
                         deleteStudent={deleteStudent}
+                        updateStudent={updateStudent}
                         studentID={studentRecord.student_id}
                         
                         
