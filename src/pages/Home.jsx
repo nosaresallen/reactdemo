@@ -1,6 +1,6 @@
 import Student from "./Student";
 import { useState, useEffect } from "react";
-import { getFirestore, collection, onSnapshot, addDoc, doc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "firebase/firestore";
 import firebaseApp from "./firebase.Config";
 
 function Home (){
@@ -22,9 +22,13 @@ function Home (){
         try {  
             // Reading and displaying data from firestore
             onSnapshot(collection(db, 'students'), snapshot => {
+
                 const newStudentList = [];
+
                 snapshot.forEach(student => {
-                    newStudentList.push(student.data());
+                    const tempStudent = student.data();
+                    tempStudent["student_id"] = student.id;
+                    newStudentList.push(tempStudent);
                 });
                 setStudentList(newStudentList);
                 
@@ -66,6 +70,14 @@ function Home (){
 
         }
 
+    }
+
+    const deleteStudent = (studentID, firstname, lastname) => {
+        const db = getFirestore(firebaseApp);
+        confirm(`Are you sure you want to delete ${firstname} ${lastname}?`).then(
+            deleteDoc(doc(db, 'students', studentID))
+        )
+        
     }
 
     return(
@@ -122,6 +134,8 @@ function Home (){
                         firstname={studentRecord.firstname}
                         lastname={studentRecord.lastname}
                         grade={studentRecord.grade}
+                        deleteStudent={deleteStudent}
+                        studentID={studentRecord.student_id}
                         
                         
                     />
